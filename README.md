@@ -1,2 +1,234 @@
 # Camera-e2vTopaz2M-QSC610
 Camera driver for Qualcomm QCS610
+
+* Bin: 
+The sensor driver binary file, customer can push those files in folder bin to the device's
+/usr/lib/cmaera to verify.
+
+* CodeFile: 
+All source files that need to be modified during the development.
+
+* Patch: 
+Patch containing all development modifications.
+
+* RawImage: 
+Dump raw image from device.
+
+* Function: 
+1920x1080 raw10 60fps bring up on QCS610 LE2.0
+
+## Install and Run sdkmanager
+Install docker
+
+    sudo apt  install docker.io
+
+get the sdk manager:
+
+
+    sudo apt-get install wget
+    
+    sudo wget https://sdkgit.thundercomm.com/api/v4/projects/4649/repository/files/turbox-sdkmanager-setup.sh/raw?ref=main -O /usr/bin/turbox-sdkmanager-setup.sh
+
+make it executable:
+
+    sudo chmod +x /usr/bin/turbox-sdkmanager-setup.sh
+
+
+## Start SDK manager
+    turbox-sdkmanager-setup.sh --tag v3.2.3
+
+=> the docker creates a folder ~/turbox-sdkmanager-ws and everything is saved and loaded inside
+
+Create the ssh Key (inside the docker)
+
+    ssh-keygen -t rsa -C "romain.guiguet@teledyne.com"
+    
+copy tkey in the gitlab: https://sdkgit.thundercomm.com/-/profile/keys
+
+    cat ~/.ssh/id_rsa.pub
+
+Create a token in GitLab account for the next step
+
+    sdkmanager --init
+
+Here is what is needed to configure:
+```
+[turbox@sdkmanager-18.04-3.2.3 ~ ]$ sdkmanager --init
+[INFO]	The current network is available.
+[INFO]	Accessing the server...
+[INFO]	Checking TOKEN ...
+TOKEN INVALID.
+Please refer to https://docs.thundercomm.com/turbox_doc/tools/turbox-sdk-git-user-guide to generate the token.
+If you do not have a ThunderComm account, please contact service@thundercomm.com.
+Please Input the token :glpat-G8FDb9noQ_jSCUPi-wPD
+[INFO]	TOKEN       OK.
+
+[INFO]	Checking SSH KEY ...
+[INFO]	SSH KEY     OK.
+
+[INFO]	Checking Git ...
+[INFO]	Current git user.name = .
+[INFO]	Current git user.email = .
+Do you want to initialize your git account?(Yes/No): Yes
+Please input the user.name: romain.guiguet@teledyne.com
+Please input the user.email: romain.guiguet@teledyne.com
+[INFO]	Current git user.name = romain.guiguet@teledyne.com.
+[INFO]	Current git user.email = romain.guiguet@teledyne.com.
+[INFO]	GIT         OK.
+
+Select your region, as your SDK download speed is closely related to your choice of region.
+    1. Chinese mainland
+    2. Others
+Select your region [Enter the number]:2
+[INFO]	Setting region to Others ...
+[INFO]	Region      OK.
+```
+
+## Download the sources (in the sdkmanager docker)
+
+    sdkmanager --sdk_download
+
+Here is what is needed to configure:
+```
+[turbox@sdkmanager-18.04-3.2.3 ~ ]$ sdkmanager --sdk_download
+[INFO]	The current network is available.
+[INFO]	Accessing the server...
+[INFO]	Getting your information, please wait ...
+
+Product options are as follows:
+....1. TurboX_CT6490_C6490
+....2. TurboX_C610_C410
+Which product would you like?    [Enter the number]:
+2
+
+SDK branch options are as follows:
+....1. SDK.Turbox-QCS610.LA.2.0
+....2. SDK.Turbox-QCS610.LE.2.0
+....3. SDK.Turbox_C610.LA1.0
+....4. SDK.turbox-c610-le1.0-dev
+Which SDK branch would you like? [Enter the number]:
+2
+
+Version options are as follows:
+....1. turbox-c610-le2.0-dev.release.CS.r002001
+....2. turbox-c610-le2.0-dev.release.Post-CS1.r002002
+Which version would you like?    [Enter the number]:
+2
+Input a relative path(/home/turbox/workspace/<relative path>) for sdk code or input 'Enter' to select the default directory:/home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002):
+Are you sure to download the source code to /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002 ?(Yes/No): Yes
+```
+... AFTER COUPLE OF HOURS ...
+
+```
+[INFO]	Success: repo sync -c -d --no-tags -j3 --no-clone-bundle
+[INFO]	turbox-c610-le2.0-dev.release.Post-CS1.r002002 download succeeded.
+[CMD]	PATH: /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002
+```
+
+## Copy the patch and apply it
+FROM OUTSIDE DOCKER:
+
+```
+cd /home/teledyne/turbox-sdkmanager-ws/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/src/vendor/qcom/proprietary
+```
+
+```
+cp -r  ~/DRIVER_QUALCOMM/2024.06.28-QualcommDriversDeliverables/QCS610_release/Patch .
+ ```
+
+FROM DOCKER sdkmanager:
+```
+cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/src/vendor/qcom/proprietary
+```
+
+```
+git apply Patch/0001-Camera-Bring-up-e2vTopaz2M.patch --whitespace=nowarn
+```
+
+## Build the image
+```
+cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002
+```
+
+```
+./turbox_build.sh -alv debug
+```
+
+... AFTER COUPLE OF HOURS ...
+
+## correction patch to solve this issue
+FROM OUTSIDE DOCKER:
+```
+cd /home/teledyne/turbox-sdkmanager-ws/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/poky/meta-qti-bsp
+```
+
+```
+cp /home/teledyne/DRIVER_QUALCOMM/C610-install_patch/patch_ptool-native_git.txt .
+```
+
+FROM DOCKER sdkmanager:
+```
+cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/poky/meta-qti-bsp
+```
+
+```
+patch -p1 < patch_ptool-native_git.txt
+```
+RESTART THE BUILD
+```
+cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002
+```
+
+```
+./turbox_build.sh -alv debug
+```
+
+
+##Create the image
+
+```
+./turbox_build.sh -uv debug
+```
+
+```
+./turbox_build.sh --zip_flat_build -l -v debug
+```
+
+## Flash the image
+The best steps to do is the following
+-	Unplug all cables
+-	Hold down the “FORCE_USB_BOOT” button on Kit while plugging a USB cable (without power cable!) to your windows PC. Here you should the kit appears as mode 9008 in Device Manager. 
+-	When this happens, plug in the power cable and open QFIL
+-	In QFIL, make sure memory type selected is eMMC for C610, then choose correct port, correct flat image page (in “Select Programmer” browse) and correct XML
+-	Before you click download, right-click “Status” window and choose “clear log”, then click the Download button
+-	If it still fails, right-click again the “Status” button and choose “Save log” and send us the log
+-	Try to repeat again if it fails, after closing SW programs and unplugging all cables
+
+##  Video Stream
+- connect usb-C
+- power on
+- push power on button
+
+```
+adb devices
+```
+
+	List of devices attached
+	1a6c8f68	device
+
+```
+adb forward tcp:8900 tcp:8900
+```
+
+```
+adb forward --list
+```
+	1a6c8f68 tcp:8900 tcp:8900
+
+```
+adb shell
+```
+
+```
+gst-launch-1.0 -e qtiqmmfsrc camera=0 ! video/x-raw\(memory:GBM\),format=NV12,width=1920,height=1080,framerate=60/1 ! omxh264enc target-bitrate=6000000 control-rate=constant ! h264parse config-interval=1 ! mpegtsmux name=muxer ! queue ! tcpserversink port=8900 host=127.0.0.1
+```
