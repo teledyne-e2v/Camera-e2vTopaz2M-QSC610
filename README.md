@@ -293,13 +293,14 @@ adb reboot
 Wait for the reboot is completed
 
 ```
-adb shell
-```
-
-```
 adb root && adb remount && adb shell mount -o remount,rw /
 ```
 
+```
+export WESTON_DISABLE_ATOMIC=1
+export XDG_RUNTIME_DIR=/run/user/root
+weston --tty=1 --idle-time=123456 &
+```
 
 ```
 gst-launch-1.0 qtiqmmfsrc name=camsrc ! video/x-raw\(memory:GBM\), format=NV12,width=1920,height=1080, framerate=60/1 ! waylandsink fullscreen=true async=true sync=false
