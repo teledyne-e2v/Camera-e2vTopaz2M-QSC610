@@ -204,7 +204,9 @@ The best steps to do is the following
 -	If it still fails, right-click again the “Status” button and choose “Save log” and send us the log
 -	Try to repeat again if it fails, after closing SW programs and unplugging all cables
 
-##  Video Stream
+
+
+##  Save Images
 - connect usb-C
 - power on
 - push power on button
@@ -212,23 +214,93 @@ The best steps to do is the following
 ```
 adb devices
 ```
+List of devices attached
 
-	List of devices attached
-	1a6c8f68	device
+1a6c8f68	device
 
-```
-adb forward tcp:8900 tcp:8900
-```
 
 ```
-adb forward --list
+adb root
 ```
-	1a6c8f68 tcp:8900 tcp:8900
+
+
+```
+adb remount
+```
+
+
+```
+adb disable-verity
+```
+
+
+```
+adb reboot
+```
+
+Wait for the reboot is completed
+
+```
+adb root
+```
+
+
+```
+adb remount
+```
+
+
+```
+adb shell
+```
+
+
+```
+gst-launch-1.0 -e qtiqmmfsrc name=qmmf camera=0 ! 'video/x-bayer,format=(string)gbrg,bpp=(string)10,width=1920,height=1080,framerate=60/1' ! multifilesink enable-last-sample=false location="/data/misc/camera/MipiRaw10_%d.raw" max-files=5
+```
+
+##  Live preview on screen
+- connect usb-C
+- connect hdmi to a screen
+- power on
+- push power on button
+
+
+```
+adb devices
+```
+
+List of devices attached
+
+1a6c8f68	device
+
+```
+adb root
+```
+
+```
+adb remount
+```
+
+```
+adb disable-verity
+```
+
+```
+adb reboot
+```
+
+Wait for the reboot is completed
 
 ```
 adb shell
 ```
 
 ```
-gst-launch-1.0 -e qtiqmmfsrc camera=0 ! video/x-raw\(memory:GBM\),format=NV12,width=1920,height=1080,framerate=60/1 ! omxh264enc target-bitrate=6000000 control-rate=constant ! h264parse config-interval=1 ! mpegtsmux name=muxer ! queue ! tcpserversink port=8900 host=127.0.0.1
+adb root && adb remount && adb shell mount -o remount,rw /
+```
+
+
+```
+gst-launch-1.0 qtiqmmfsrc name=camsrc ! video/x-raw\(memory:GBM\), format=NV12,width=1920,height=1080, framerate=60/1 ! waylandsink fullscreen=true async=true sync=false
 ```
