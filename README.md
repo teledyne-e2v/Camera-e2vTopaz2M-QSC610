@@ -295,13 +295,17 @@ Wait for the reboot is completed
 ```
 adb root && adb remount && adb shell mount -o remount,rw /
 ```
-
+Start the remote shell:
+```
+adb shell
+```
+Activate Weston environment and HDMI display
 ```
 export WESTON_DISABLE_ATOMIC=1
 export XDG_RUNTIME_DIR=/run/user/root
 weston --tty=1 --idle-time=123456 &
 ```
-
+Start gstreamer pipeline
 ```
 gst-launch-1.0 qtiqmmfsrc name=camsrc ! video/x-raw\(memory:GBM\), format=NV12,width=1920,height=1080, framerate=60/1 ! waylandsink fullscreen=true async=true sync=false
 ```
