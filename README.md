@@ -195,7 +195,27 @@ cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002
 ```
 
 ## Flash the image
-The best steps to do is the following
+FROM OUTSIDE DOCKER:
+
+Identify the docker ID:
+```
+sudo docker ps
+```
+Terminal render looks like this:
+```
+CONTAINER ID   IMAGE                                                                COMMAND       CREATED        STATUS        PORTS     NAMES
+ea61bf6aa551   public.ecr.aws/k5o4b3u5/thundercomm/turbox-sdkmanager-18.04:v3.2.3   "/bin/bash"   4 months ago   Up 17 hours             turbox-sdkmanager-18.04_v3.2.3_1000
+```
+The container ID here is ea61bf6aa551, please replace it in all the next commands by your own ID.
+
+Get the image from the docker
+```
+sudo docker cp ea61bf6aa551:/home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/turbox/output/FlatBuild_Turbox_C610_xx.xx_LE2.0.l.debug.Post-CS1.r002002.zip .
+```
+
+Copy the ZIP file in Windows PC and extract it.
+
+Flashing procedure:
 -	Unplug all cables
 -	Hold down the “FORCE_USB_BOOT” button on Kit while plugging a USB cable (without power cable!) to your windows PC. Here you should the kit appears as mode 9008 in Device Manager. 
 -	When this happens, plug in the power cable and open QFIL
