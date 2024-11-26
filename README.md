@@ -308,6 +308,7 @@ adb disable-verity
 
 ```
 adb reboot
+adb wait-for-device
 ```
 
 Wait for the reboot is completed
