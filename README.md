@@ -124,6 +124,8 @@ Are you sure to download the source code to /home/turbox/workspace/sourcecode/tu
 [INFO]	turbox-c610-le2.0-dev.release.Post-CS1.r002002 download succeeded.
 [CMD]	PATH: /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002
 ```
+To recreate a new installation from scratch, that is require to remove the following folders: `sourcecode` and `.repo`
+
 
 ## Copy the patch and apply it
 FROM OUTSIDE DOCKER:
