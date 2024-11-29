@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "Weston preview starting ..." > /dev/kmsg
+
+export WESTON_DISABLE_ATOMIC=1
+export XDG_RUNTIME_DIR=/run/user/root
+weston --tty=1 --idle-time=123456 &
+sleep 5
+gst-launch-1.0 qtiqmmfsrc name=camsrc ! video/x-raw\(memory:GBM\), format=NV12, width=1920, height=1080, framerate=60/1 ! waylandsink fullscreen=true  async=true sync=false &
+
+echo "Weston preview started complete!" > /dev/kmsg

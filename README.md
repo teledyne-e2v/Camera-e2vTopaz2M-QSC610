@@ -126,25 +126,66 @@ Are you sure to download the source code to /home/turbox/workspace/sourcecode/tu
 ```
 To recreate a new installation from scratch, that is require to remove the following folders: `sourcecode` and `.repo`
 
+## Copy the patches and apply them
+Open two terminals:
+- [DOCKER]: terminal where the sdk manager has been started in the previous step
+- [DRIVER]: treminal where this repository has been clone, containing the divers files and patches
+Please follow the next steps in the correct order to apply properly the different patches
 
-## Copy the patch and apply it
-FROM OUTSIDE DOCKER:
+That is also require to note the CONTAINER ID that will be used in next steps to copy the patche files to docker:
+[DRIVER]:
+```
+sudo docker ps
+```
+terminal render:
+```
+CONTAINER ID   IMAGE                                                                COMMAND       CREATED        STATUS      PORTS     NAMES
+ea61bf6aa551   public.ecr.aws/k5o4b3u5/thundercomm/turbox-sdkmanager-18.04:v3.2.3   "/bin/bash"   4 months ago   Up 3 days             turbox-sdkmanager-18.04_v3.2.3_1000
+```
+The container ID here is ea61bf6aa551, please replace it in all the next commands by your own ID.
+
+### Recipe correction
+This correction has to be applied manually by copying the following files:
+
+[DRIVER]:
+```
+sudo docker cp recipe/patch_ptool-native_git.txt ea61bf6aa551:/home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/poky/meta-qti-bsp/.
+```
+[DOCKER]:
+```
+cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/poky/meta-qti-bsp
+```
 
 ```
-cd /home/teledyne/turbox-sdkmanager-ws/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/src/vendor/qcom/proprietary
+patch -p1 < patch_ptool-native_git.txt
 ```
 
+### Base driver :
+[DRIVER]:
 ```
-cp -r  ~/DRIVER_QUALCOMM/2024.06.28-QualcommDriversDeliverables/QCS610_release/Patch .
- ```
-
-FROM DOCKER sdkmanager:
+sudo docker cp Patch ea61bf6aa551:/home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/src/vendor/qcom/proprietary/.
+```
+[DOCKER]:
 ```
 cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/src/vendor/qcom/proprietary
 ```
 
 ```
 git apply Patch/0001-Camera-Bring-up-e2vTopaz2M.patch --whitespace=nowarn
+```
+
+### [optional] Weston environment auto-start :
+That is possible to start the Weston GUI environment at power up using a script.
+To prepare this function, that is required to add the following option in the kernel before creating the image.
+
+[DOCKER]:
+```
+vim apps_proc/poky/meta-qti-distro/conf/distro/qti-distro-rb-debug.conf
+```
+At the end of the file, add the following statement:
+```
+#Remove selinux distro feature
+DISTRO_FEATURES_remove = "selinux"
 ```
 
 ## Build the image
@@ -158,31 +199,9 @@ cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002
 
 ... AFTER COUPLE OF HOURS ...
 
-## correction patch to solve this issue
-FROM OUTSIDE DOCKER:
-```
-cd /home/teledyne/turbox-sdkmanager-ws/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/poky/meta-qti-bsp
 ```
 
-```
-cp /home/teledyne/DRIVER_QUALCOMM/C610-install_patch/patch_ptool-native_git.txt .
-```
 
-FROM DOCKER sdkmanager:
-```
-cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/poky/meta-qti-bsp
-```
-
-```
-patch -p1 < patch_ptool-native_git.txt
-```
-RESTART THE BUILD
-```
-cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002
-```
-
-```
-./turbox_build.sh -alv debug
 ```
 
 
@@ -197,20 +216,9 @@ cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002
 ```
 
 ## Flash the image
-FROM OUTSIDE DOCKER:
-
-Identify the docker ID:
-```
-sudo docker ps
-```
-Terminal render looks like this:
-```
-CONTAINER ID   IMAGE                                                                COMMAND       CREATED        STATUS        PORTS     NAMES
-ea61bf6aa551   public.ecr.aws/k5o4b3u5/thundercomm/turbox-sdkmanager-18.04:v3.2.3   "/bin/bash"   4 months ago   Up 17 hours             turbox-sdkmanager-18.04_v3.2.3_1000
-```
-The container ID here is ea61bf6aa551, please replace it in all the next commands by your own ID.
-
 Get the image from the docker
+
+[DRIVER]:
 ```
 sudo docker cp ea61bf6aa551:/home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/turbox/output/FlatBuild_Turbox_C610_xx.xx_LE2.0.l.debug.Post-CS1.r002002.zip .
 ```
@@ -227,92 +235,119 @@ Flashing procedure:
 -	Try to repeat again if it fails, after closing SW programs and unplugging all cables
 
 
+## Testing
 
-##  Save Images
-- connect usb-C
-- power on
-- push power on button
+Start the board:
+* connect keyboard/mouse/screen (display port)
+* connect usb-C to a host PC for adb commands
+* connect power supply
+* power on
+* push power on button
 
+### [optional] Weston environment auto-start :
+That is possible to start the Weston GUI environment at power up using a script.
+It requires to have the SELINUX option disabled (see the patch section).
+
+[DRIVER]:
+
+Check the device is connected
 ```
 adb devices
+```
+Expected render:
 ```
 List of devices attached
 
 1a6c8f68	device
 
-
+```
+Execute the following commands:
 ```
 adb root
-```
-
-
-```
 adb remount
-```
-
-
-```
 adb disable-verity
-```
-
-
-```
 adb reboot
+adb wait-for-device
+adb root
+adb remount
+adb shell "setenforce 0"
+adb shell "mount -o remount,rw /"
+adb push weston/weston_preview /sbin/
+adb shell "chmod 755 /sbin/weston_preview"
+adb push weston/weston.service /etc/systemd/system/
+adb shell "chmod 644 /etc/systemd/system/weston.service"
+adb shell "systemctl daemon-reload"
+adb shell "systemctl enable weston"
+adb shell "systemctl start weston"
+```
+The Weston GUI environment should start.
+
+After a reboot, this environment automatically starts.
+
+Here is a gstreamer pipeline that can be executed in a weston terminal to test the camera:
+```
+gst-launch-1.0 qtiqmmfsrc name=camsrc ! video/x-raw\(memory:GBM\), format=NV12,width=1920,height=1080, framerate=60/1 ! waylandsink fullscreen=false async=true sync=false
 ```
 
+###  Save Images
+
+[DRIVER]:
+```
+adb devices
+```
+
+Terminal render:
+```
+List of devices attached
+
+1a6c8f68	device
+```
+Change the permission level
+```
+adb root
+adb remount
+adb disable-verity
+adb reboot
+adb wait-for-device
+```
 Wait for the reboot is completed
 
 ```
 adb root
-```
-
-
-```
 adb remount
-```
-
-
-```
 adb shell
 ```
-
-
+A terminal access running on the board is created and a gstreamer pipeline can be launched to save RAW images:
 ```
 gst-launch-1.0 -e qtiqmmfsrc name=qmmf camera=0 ! 'video/x-bayer,format=(string)gbrg,bpp=(string)10,width=1920,height=1080,framerate=60/1' ! multifilesink enable-last-sample=false location="/data/misc/camera/MipiRaw10_%d.raw" max-files=5
 ```
+To get the images from the platform:
+```
+adb pull /data/misc/camera .
+```
+The image format is packed in 10b words so that is required to unpacked them to 16b image before opening them in an image viewer.
 
-##  Live preview on screen
-- connect usb-C
-- connect hdmi to a screen
-- power on
-- push power on button
+###  Live preview on screen
 
-
+[DRIVER]:
 ```
 adb devices
 ```
-
+Terminal render:
+```
 List of devices attached
 
 1a6c8f68	device
+```
+Change the permission level
 
 ```
 adb root
-```
-
-```
 adb remount
-```
-
-```
 adb disable-verity
-```
-
-```
 adb reboot
 adb wait-for-device
 ```
-
 Wait for the reboot is completed
 
 ```
@@ -322,7 +357,9 @@ Start the remote shell:
 ```
 adb shell
 ```
-Activate Weston environment and HDMI display
+A terminal access running on the board is created.
+
+Activate Weston environment and HDMI display:
 ```
 export WESTON_DISABLE_ATOMIC=1
 export XDG_RUNTIME_DIR=/run/user/root
@@ -332,3 +369,10 @@ Start gstreamer pipeline
 ```
 gst-launch-1.0 qtiqmmfsrc name=camsrc ! video/x-raw\(memory:GBM\), format=NV12,width=1920,height=1080, framerate=60/1 ! waylandsink fullscreen=true async=true sync=false
 ```
+
+### Log creation for debug
+
+In case of facing issue, that is possible to generate a log file.
+
+[DRIVER]:
+

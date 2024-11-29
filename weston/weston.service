@@ -1,0 +1,21 @@
+# Copyright (c) 2017,2019-2020 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+[Unit]
+Description=Weston Preview Service
+SourcePath=/sbin/weston_preview
+#Requires=leprop.service
+#After=leprop.service
+
+[Service]
+User=root
+Group=root
+Restart=no
+Type=simple
+RemainAfterExit=yes
+ExecStart=/sbin/weston_preview
+ExecStop=/sbin/weston_preview
+
+[Install]
+WantedBy=multi-user.target
