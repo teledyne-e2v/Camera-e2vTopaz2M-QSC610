@@ -180,7 +180,7 @@ To prepare this function, that is required to add the following option in the ke
 
 [DOCKER]:
 ```
-vim apps_proc/poky/meta-qti-distro/conf/distro/qti-distro-rb-debug.conf
+vim apps_proc/poky/meta-qti-distro/conf/distro/qti-distro-fullstack-debug.conf
 ```
 At the end of the file, add the following statement:
 ```
