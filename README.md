@@ -375,13 +375,21 @@ gst-launch-1.0 qtiqmmfsrc name=camsrc ! video/x-raw\(memory:GBM\), format=NV12,w
 In case of facing issue, that is possible to generate a log file.
 
 [DRIVER]:
-//enable log mask
+Enable log mask
+```
 adb push camxoverridesettings.txt /etc/camera
-//reboot device and enable log settings
+```
+Reboot device and enable log settings
+```
 adb reboot
 adb wait-for-device
 adb root
 adb remount
-//start collect logs after the device powered up
+```
+Start collect logs after the device powered up
+```
 adb logcat -v threadtime -b all -b crash > your_log.txt
-//Then start reproducing the problem，after reproducing the problem, use Ctrl+C to stop log scraping and provide the log file on this case
+```
+Then start reproducing the problem，after reproducing the problem, use Ctrl+C to stop log scraping and provide the log file on this case
+
+
