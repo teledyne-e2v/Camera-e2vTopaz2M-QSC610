@@ -200,8 +200,12 @@ cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002
 ... AFTER COUPLE OF HOURS ...
 
 ```
+NOTE: Running noexec task 8168 of 8168 (/home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc/poky/meta-qti-bsp/recipes-products/images/qti-multimedia-image.bb:do_build)
+NOTE: Tasks Summary: Attempted 8168 tasks of which 7306 didn't need to be rerun and all succeeded.
+NOTE: Writing buildhistory
+NOTE: Writing buildhistory took: 58 seconds
 
-
+Summary: There were 209 WARNING messages shown.
 ```
 
 
