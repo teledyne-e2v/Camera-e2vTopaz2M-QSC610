@@ -207,7 +207,13 @@ NOTE: Writing buildhistory took: 58 seconds
 
 Summary: There were 209 WARNING messages shown.
 ```
-
+Note that is you have a recipe error like ```ptool-native_git.bb``` you have to check the version following the URL.
+If you need to modify the version, the checksum will vary also: please run the build agin to get the new value.
+After any change in the recipe, to take it into account that is require to remove the following file before running the build script:
+```
+cd /home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/apps_proc
+rm -rf build-qti-distro-fullstack-debug
+```
 
 ##Create the image
 
