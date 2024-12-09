@@ -225,27 +225,31 @@ rm -rf build-qti-distro-fullstack-debug
 ./turbox_build.sh --zip_flat_build -l -v debug
 ```
 
-## Flash the image
 Get the image from the docker
 
 [DRIVER]:
 ```
 sudo docker cp ea61bf6aa551:/home/turbox/workspace/sourcecode/turbox-c610-le2.0-dev.release.Post-CS1.r002002/turbox/output/FlatBuild_Turbox_C610_xx.xx_LE2.0.l.debug.Post-CS1.r002002.zip .
 ```
-
+## Flash the image
 Copy the ZIP file in Windows PC and extract it.
+Install QPST (https://qpsttool.com/), don't forget the driver inside the archive.
+Download QFIL (https://qfiltool.com/) and extract the archive.
 
-Flashing procedure:
--	Unplug all cables
--	Hold down the “FORCE_USB_BOOT” button on Kit while plugging a USB cable (without power cable!) to your windows PC. Here you should the kit appears as mode 9008 in Device Manager. 
--	When this happens, plug in the power cable and open QFIL
--	In QFIL, make sure memory type selected is **eMMC** for C610, then choose correct port, correct flat image page (in “Select Programmer” browse) and correct XML
--	Before you click download, right-click “Status” window and choose “clear log”, then click the Download button
--	If it still fails, right-click again the “Status” button and choose “Save log” and send us the log
--	Try to repeat again if it fails, after closing SW programs and unplugging all cables
+Follow these steps to force the device to enter 9008 (EDL) mode:
+1. Unplug all cables
+2. Press the **FORCE_USB_BOOT** key and hold it
+3. Connect the device to the host machine via USB Type-C cable, wait 2 seconds and release the FORCE_USB_BOOT key.
+4. Connect the device to a 12 V Power supply.
 
+Open QFIL tool:
+1. SelectPort: Ensure that the 9008 port is found.
+2. Select Flat build, click Browser… to select programmer in the image folder: ```prog_firehose_ddr.elf```
+3. Click Load XML and select the ```rawprogram_unparse0.xml``` then ```patch0.xml```
+4. Select **eMMC** device storage type configuration.
+5. Click on Dowload
 
-## Testing
+## Test the driver
 
 Start the board:
 * connect keyboard/mouse/screen (display port)
